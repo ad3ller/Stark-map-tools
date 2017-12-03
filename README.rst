@@ -23,7 +23,7 @@ Usage
 
     >>> from smtools import sm_sort, lc_cmap
 
-`sm_sort(xvals, yvals, colors)
+`sm_sort(xvals, yvals, colors)`
      sort a Stark/ Zeeman map to preserve the state order through exact crossings.
 
 `lc_cmap(arr)`
