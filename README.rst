@@ -1,5 +1,5 @@
-SM tools
-========
+Stark map tools
+===============
 
 v0.0.1.dev.
 
@@ -12,8 +12,8 @@ Clone and install using setuptools.
 
 .. code-block:: bash
 
-   git clone https://github.com/ad3ller/sm_tools
-   cd sm_tools
+   git clone https://github.com/ad3ller/Stark-map-tools
+   cd Stark-map-tools
    python setup.py install
 
 Usage
