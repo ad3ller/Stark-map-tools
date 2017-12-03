@@ -1,15 +1,14 @@
 #! python
 import numpy as np
-from numba import jit
 
 from matplotlib.collections import LineCollection
 def lc_cmap(xvals, yvals, colors):
-    """ color map to line plot. 
+    """ Apply a color map to line plot. 
 
         args:
             xvals              np.array
             yvals              np.array
-            colors            np.array of RGB(a) tuples
+            colors             np.array of RGB[alpha] tuples
     
         return:
             matplotlib.collections.LineCollection
@@ -28,34 +27,38 @@ def lc_cmap(xvals, yvals, colors):
     lc = LineCollection(segs, colors=colors)
     return lc
 
-@jit
-def sm_sort(arr, mid_sort=True):
-    """ Attempt to re-sort arr into continuous lines by discreet extrapolation.
+def sm_sort(arr, **kwargs):
+    """ Attempt to sort a Stark map (arr) into continuous lines by discreet extrapolation.
 
          args:
-                arr                           2d np.array()
+                arr                        np.array() (2D)
 
          kwargs:
-                 mid_sort=True       start from the middle line
+                 mid_sort=True             start from the middle line
 
          return:
                 sorted_array, order
     """
+    mid_sort = kwargs.get('mid_sort', True)
     num_rows, num_lines = np.shape(arr)
     # initialise
     order = np.zeros_like(arr)
     d2arr = arr.copy()
+    # assume no crossings in first 4 rows
     for i in range(4):
         order[i] = range(num_lines)
     # lines
     jvals = np.arange(num_lines)
     if mid_sort:
+        # start from the middle line
         jvals = jvals[np.argsort(np.abs(jvals - (len(jvals) - 1.0)/2.0))]
     for i in range(4, num_rows):
         for j in jvals:
+            # extrapolate last 4 values to guess the next
             yvals = d2arr[i-4:i, j]
             guess = 4 * yvals[-1] - 6 * yvals[-2] + 4 * yvals[-3] - yvals[-4]
-            arg = np.argmin(abs(guess - arr[i]))
+            # find the closest data point
+            arg = np.argmin(np.abs(guess - arr[i]))
             order[i, j] = arg
             d2arr[i, j] = arr[i][arg]
     return d2arr, order
