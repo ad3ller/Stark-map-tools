@@ -23,12 +23,12 @@ Usage
 
     >>> from smtools import sm_sort, lc_cmap
 
-``sm_sort(arr)``
+sm_sort(arr)
      
-     sort a Stark/ Zeeman map to preserve the state order through exact crossings.
+    sort a Stark/ Zeeman map to preserve the state order through exact crossings.
 
-``lc_cmap(xvals, yvals, colors)``
+lc_cmap(xvals, yvals, colors)
      
-     apply a colormap to matplotlib.pyplot.plot using LineCollections.
+    apply a colormap to matplotlib.pyplot.plot using LineCollections.
      
- See notebooks for examples.
+See notebooks for examples.
