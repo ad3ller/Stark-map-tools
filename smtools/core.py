@@ -1,49 +1,59 @@
 #! python
+""" Tools for plotting Stark maps
+"""
 import numpy as np
-
 from matplotlib.collections import LineCollection
+
 def lc_cmap(xvals, yvals, colors):
-    """ Apply a color map to line plot. 
+    """ Apply a color map to line plot.
 
         args:
             xvals              np.array
             yvals              np.array
             colors             np.array of RGB[alpha] tuples
-    
+
         return:
             matplotlib.collections.LineCollection
-    
+
         >>> colors = np.asarray([(0.8, 0.2, 0.2, a) for a in zs]) #RGBalpha
-        >>> lc = lc_cmap(xvals, yvals, colors)
-        >>> lc.set_linewidth(3)
-        
+        >>> lines = lc_cmap(xvals, yvals, colors)
+        >>> lines.set_linewidth(3)
+
         >>> import matplotlib.pyplot as plt
         >>> fig, ax = plt.subplots()
-        >>> ax.add_collection(lc)
+        >>> ax.add_collection(lines)
         >>> plt.show()
     """
     pts = np.array([xvals, yvals]).T.reshape(-1, 1, 2)
     segs = np.concatenate([pts[:-1], pts[1:]], axis=1)
-    lc = LineCollection(segs, colors=colors)
-    return lc
+    lines = LineCollection(segs, colors=colors)
+    return lines
 
-def sm_sort(arr, **kwargs):
+def sm_sort(arr, arr2=None, **kwargs):
     """ Attempt to sort a Stark map (arr) into continuous lines by discreet extrapolation.
 
          args:
-                arr                        np.array() (2D)
+                arr                       np.array() (2D)
+                arr2=None                 np.array() (2D)
+                                          arr2 will be returned using the
+                                          same ordering as applied to arr.
 
          kwargs:
-                 mid_sort=True             start from the middle line
+                 mid_sort=True            start from the middle line
+                 order=False              return ordering
 
          return:
-                sorted_array, order
+                sorted_arr, [sorted arr2], [order]
     """
     mid_sort = kwargs.get('mid_sort', True)
+    get_order = kwargs.get('order', False)
     num_rows, num_lines = np.shape(arr)
     # initialise
-    order = np.zeros_like(arr)
+    order = np.zeros_like(arr, dtype=int)
     d2arr = arr.copy()
+    if arr2 is not None:
+        assert np.shape(arr) == np.shape(arr2), "arr and arr2 must have the same shape"
+        d2arr2 = arr2.copy()
     # assume no crossings in first 4 rows
     for i in range(4):
         order[i] = range(num_lines)
@@ -61,4 +71,41 @@ def sm_sort(arr, **kwargs):
             arg = np.argmin(np.abs(guess - arr[i]))
             order[i, j] = arg
             d2arr[i, j] = arr[i][arg]
-    return d2arr, order
+            if arr2 is not None:
+                d2arr2[i, j] = arr2[i][arg]
+    output = (d2arr,)
+    if arr2 is not None:
+        output = output + (d2arr2,)
+    if get_order:
+        output = output + (order,)
+    if len(output) == 1:
+        output = output[0]
+    return output
+
+def tros_ms(arr, arr2=None, **kwargs):
+    """ The inverse of sm_sort().
+    """
+    get_order = kwargs.get('order', False)
+    num_rows, num_cols = np.shape(arr)
+    # initialise
+    order = np.zeros_like(arr, dtype=int)
+    d2arr = arr.copy()
+    if arr2 is not None:
+        assert np.shape(arr) == np.shape(arr2), "arr and arr2 must have the same shape"
+        d2arr2 = arr2.copy()
+    # sort
+    for i in range(num_rows):
+        arg = np.argsort(arr[i])
+        order[i] = arg
+        d2arr[i] = arr[i, arg]
+        if arr2 is not None:
+            d2arr2[i] = arr2[i, arg]
+    # output
+    output = (d2arr,)
+    if arr2 is not None:
+        output = output + (d2arr2,)
+    if get_order:
+        output = output + (order,)
+    if len(output) == 1:
+        output = output[0]
+    return output
