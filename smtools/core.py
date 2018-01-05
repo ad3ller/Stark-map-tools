@@ -83,7 +83,7 @@ def sm_sort(arr, arr2=None, **kwargs):
     return output
 
 def tros_ms(arr, arr2=None, **kwargs):
-    """ The inverse of sm_sort().
+    """ The reverse of sm_sort().
     """
     get_order = kwargs.get('order', False)
     num_rows, num_cols = np.shape(arr)
